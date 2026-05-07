@@ -12,9 +12,9 @@ EUROPEAN_AIRPORTS = [
     "LEMD",  # Madrid Barajas
     "LIRF",  # Rome Fiumicino
     "LEBL",  # Barcelona El Prat
-    "EDDM",  # Munich
-    "EGKK",  # London Gatwick
-    "EKCH",  # Copenhagen Kastrup
+    "EBBR",  # Brussels
+    "LSZH",  # Zurich
+    "LPPT",  # Lisbon
 ]
 
 # Fields returned by the OpenSky /flights/arrival and /flights/departure endpoints
