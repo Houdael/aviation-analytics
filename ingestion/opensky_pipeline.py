@@ -3,6 +3,14 @@ dlt pipeline for pulling flight arrivals and departures from the OpenSky Network
 Covers 10 major European airports.
 """
 
+import os
+import time
+from datetime import date, datetime, timedelta, timezone
+from typing import Any, Generator
+
+import dlt
+import requests
+
 # ICAO codes for 10 major European airports
 EUROPEAN_AIRPORTS = [
     "EGLL",  # London Heathrow
@@ -32,3 +40,114 @@ FLIGHT_COLUMNS = [
     "departureAirportCandidatesCount",     # Number of alternative departure airport candidates
     "arrivalAirportCandidatesCount",       # Number of alternative arrival airport candidates
 ]
+
+TOKEN_URL = (
+    "https://auth.opensky-network.org/auth/realms/opensky-network"
+    "/protocol/openid-connect/token"
+)
+
+
+class TokenManager:
+    """Fetches and transparently refreshes an OAuth2 client-credentials token."""
+
+    def __init__(self) -> None:
+        self._client_id = os.environ["OPENSKY_CLIENT_ID"]
+        self._client_secret = os.environ["OPENSKY_CLIENT_SECRET"]
+        self._access_token: str | None = None
+        self._expires_at: float = 0.0
+
+    def _fetch_token(self) -> None:
+        response = requests.post(
+            TOKEN_URL,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": self._client_id,
+                "client_secret": self._client_secret,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        self._access_token = payload["access_token"]
+        # Refresh 30 s before actual expiry to avoid clock-edge failures
+        self._expires_at = time.monotonic() + payload["expires_in"] - 30
+
+    @property
+    def token(self) -> str:
+        if self._access_token is None or time.monotonic() >= self._expires_at:
+            self._fetch_token()
+        return self._access_token  # type: ignore[return-value]
+
+    @property
+    def auth_headers(self) -> dict[str, str]:
+        return {"Authorization": f"Bearer {self.token}"}
+
+
+OPENSKY_API_BASE = "https://opensky-network.org/api"
+
+
+def fetch_flights(
+    airport: str,
+    day: date,
+    token_manager: TokenManager,
+) -> list[dict[str, Any]]:
+    """Return arrivals and departures for *airport* on *day*.
+
+    Each record contains the fields from FLIGHT_COLUMNS plus a ``flight_type``
+    field set to ``"arrival"`` or ``"departure"``.
+    """
+    begin = int(datetime(day.year, day.month, day.day, tzinfo=timezone.utc).timestamp())
+    end = begin + 86400
+
+    endpoints = [
+        ("arrival", f"{OPENSKY_API_BASE}/flights/arrival"),
+        ("departure", f"{OPENSKY_API_BASE}/flights/departure"),
+    ]
+
+    records: list[dict[str, Any]] = []
+    for flight_type, url in endpoints:
+        response = requests.get(
+            url,
+            params={"airport": airport, "begin": begin, "end": end},
+            headers=token_manager.auth_headers,
+            timeout=30,
+        )
+        response.raise_for_status()
+        for record in response.json() or []:
+            records.append({**record, "flight_type": flight_type})
+
+    return records
+
+
+@dlt.resource(name="flights", write_disposition="append")
+def flights_resource(
+    day: date,
+    token_manager: TokenManager,
+) -> Generator[dict[str, Any], None, None]:
+    for airport in EUROPEAN_AIRPORTS:
+        yield from fetch_flights(airport, day, token_manager)
+
+
+@dlt.source
+def opensky_source(
+    day: date,
+    token_manager: TokenManager,
+) -> dlt.sources.DltSource:
+    return flights_resource(day, token_manager)
+
+
+def run_pipeline() -> None:
+    yesterday = datetime.now(timezone.utc).date() - timedelta(days=1)
+    token_manager = TokenManager()
+
+    pipeline = dlt.pipeline(
+        pipeline_name="opensky",
+        destination="snowflake",
+        dataset_name="raw",
+    )
+    load_info = pipeline.run(opensky_source(yesterday, token_manager))
+    print(load_info)
+
+
+if __name__ == "__main__":
+    run_pipeline()
