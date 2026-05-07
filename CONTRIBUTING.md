@@ -19,6 +19,14 @@ We maintain two Snowflake databases:
 | `AVIATION_ANALYTICS_DEV` | Day-to-day development and testing |
 | `AVIATION_ANALYTICS_PROD` | Production data, loaded by the Dagster pipeline |
 
+### Snowflake infrastructure
+
+| Resource | DEV | PROD |
+|---|---|---|
+| Database | `AVIATION_ANALYTICS_DEV` | `AVIATION_ANALYTICS_PROD` |
+| Warehouse | `AVIATION_DBT_DEV_WH` | `AVIATION_DBT_PROD_WH` |
+| Role | `AVIATION_DBT_DEV_ROLE` | `AVIATION_DBT_PROD_ROLE` |
+
 ### Local configuration
 
 `secrets.toml` (dlt's local secrets file, never committed) must point to `AVIATION_ANALYTICS_DEV` by default. This ensures that running any pipeline or dbt command locally cannot affect production data.
