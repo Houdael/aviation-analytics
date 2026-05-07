@@ -7,7 +7,7 @@ with source as (
 renamed as (
     select
         -- surrogate key
-        md5(cast(icao24 as varchar) || '-' || cast(first_seen as varchar)) as flight_id,
+        {{ dbt_utils.generate_surrogate_key(['icao24', 'first_seen']) }} as flight_id,
 
         -- identifiers
         cast(icao24 as varchar)                   as icao24,
