@@ -10,6 +10,26 @@
 | Orchestration | Dagster |
 | Reporting | Power BI |
 
+## Environments
+
+We maintain two Snowflake databases:
+
+| Database | Purpose |
+|---|---|
+| `AVIATION_ANALYTICS_DEV` | Day-to-day development and testing |
+| `AVIATION_ANALYTICS_PROD` | Production data, loaded by the Dagster pipeline |
+
+### Local configuration
+
+`secrets.toml` (dlt's local secrets file, never committed) must point to `AVIATION_ANALYTICS_DEV` by default. This ensures that running any pipeline or dbt command locally cannot affect production data.
+
+```toml
+[destination.snowflake.credentials]
+database = "AVIATION_ANALYTICS_DEV"
+```
+
+To run against production intentionally, override the database at the CLI or via a separate secrets profile — never change the default in `secrets.toml`.
+
 ## Git conventions
 
 ### Commit message format
