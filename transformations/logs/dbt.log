@@ -1,0 +1,105 @@
+[0m18:22:41.547981 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10976a010>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1097eeb50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1097ef290>]}
+
+
+============================== 18:22:41.552160 | 76288cb7-ca3c-4941-bd27-d8976e3f57e2 ==============================
+[0m18:22:41.552160 [info ] [MainThread]: Running with dbt=1.11.8
+[0m18:22:41.552656 [debug] [MainThread]: running dbt with arguments {'partial_parse': 'True', 'warn_error': 'None', 'no_print': 'None', 'write_json': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'version_check': 'True', 'introspect': 'True', 'invocation_command': 'dbt init aviation_analytics', 'static_parser': 'True', 'printer_width': '80', 'use_experimental_parser': 'False', 'empty': 'None', 'quiet': 'False', 'target_path': 'None', 'use_colors': 'True', 'debug': 'False', 'log_format': 'default', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'cache_selected_only': 'False', 'profiles_dir': '/Users/heisenberg/.dbt', 'log_path': 'logs', 'fail_fast': 'False', 'send_anonymous_usage_stats': 'True'}
+[0m18:22:41.564964 [debug] [MainThread]: Starter project path: /opt/homebrew/lib/python3.11/site-packages/dbt/include/starter_project
+[0m18:22:41.570873 [info ] [MainThread]: 
+Your new dbt project "aviation_analytics" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m18:22:41.571203 [info ] [MainThread]: Setting up your profile.
+[0m18:23:32.173601 [debug] [MainThread]: Snowflake adapter: Setting snowflake.connector to ERROR (file logging only)
+[0m18:23:32.174640 [debug] [MainThread]: Snowflake adapter: Setting botocore to ERROR (file logging only)
+[0m18:23:32.174908 [debug] [MainThread]: Snowflake adapter: Setting boto3 to ERROR (file logging only)
+[0m18:28:49.628719 [info ] [MainThread]: Profile aviation_analytics written to /Users/heisenberg/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m18:28:49.685285 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 368.21472, "process_in_blocks": "0", "process_kernel_time": 0.358177, "process_mem_max_rss": "124764160", "process_out_blocks": "0", "process_user_time": 1.329679}
+[0m18:28:49.688070 [debug] [MainThread]: Command `dbt init` succeeded at 18:28:49.687862 after 368.22 seconds
+[0m18:28:49.689070 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x109813b10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1056befd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1097d16d0>]}
+[0m18:28:49.689655 [debug] [MainThread]: Flushing usage events
+[0m18:28:50.279650 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m18:33:54.906077 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x108c29210>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1092bbe90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10924bf50>]}
+
+
+============================== 18:33:54.910380 | f0a79986-91af-4413-9946-282d0ad317cf ==============================
+[0m18:33:54.910380 [info ] [MainThread]: Running with dbt=1.11.8
+[0m18:33:54.910872 [debug] [MainThread]: running dbt with arguments {'quiet': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'partial_parse': 'True', 'write_json': 'True', 'version_check': 'True', 'empty': 'None', 'use_experimental_parser': 'False', 'warn_error': 'None', 'fail_fast': 'False', 'target_path': 'None', 'introspect': 'True', 'log_path': 'logs', 'send_anonymous_usage_stats': 'True', 'no_print': 'None', 'profiles_dir': '/Users/heisenberg/.dbt', 'printer_width': '80', 'log_cache_events': 'False', 'static_parser': 'True', 'indirect_selection': 'eager', 'use_colors': 'True', 'invocation_command': 'dbt debug', 'log_format': 'default', 'cache_selected_only': 'False', 'debug': 'False'}
+[0m18:33:54.922994 [info ] [MainThread]: dbt version: 1.11.8
+[0m18:33:54.923278 [info ] [MainThread]: python version: 3.11.15
+[0m18:33:54.923514 [info ] [MainThread]: python path: /opt/homebrew/opt/python@3.11/bin/python3.11
+[0m18:33:54.923726 [info ] [MainThread]: os info: macOS-26.4.1-arm64-arm-64bit
+[0m18:33:55.262347 [debug] [MainThread]: Snowflake adapter: Setting snowflake.connector to ERROR (file logging only)
+[0m18:33:55.262746 [debug] [MainThread]: Snowflake adapter: Setting botocore to ERROR (file logging only)
+[0m18:33:55.262982 [debug] [MainThread]: Snowflake adapter: Setting boto3 to ERROR (file logging only)
+[0m18:33:55.311571 [info ] [MainThread]: Using profiles dir at /Users/heisenberg/.dbt
+[0m18:33:55.311893 [info ] [MainThread]: Using profiles.yml file at /Users/heisenberg/.dbt/profiles.yml
+[0m18:33:55.312106 [info ] [MainThread]: Using dbt_project.yml file at /Users/heisenberg/aviation-analytics/transformations/dbt_project.yml
+[0m18:33:55.312357 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m18:33:55.315721 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.47250637, "process_in_blocks": "0", "process_kernel_time": 0.287416, "process_mem_max_rss": "141197312", "process_out_blocks": "0", "process_user_time": 1.317129}
+[0m18:33:55.316197 [debug] [MainThread]: Command `dbt debug` failed at 18:33:55.316126 after 0.47 seconds
+[0m18:33:55.316452 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1092dabd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10938b090>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a4fb4d0>]}
+[0m18:33:55.316739 [debug] [MainThread]: Flushing usage events
+[0m18:33:55.872864 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m18:34:54.176938 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10de278d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10de3a550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10deb7110>]}
+
+
+============================== 18:34:54.180977 | 1102c311-efab-4f46-8ce0-b0a1d5343582 ==============================
+[0m18:34:54.180977 [info ] [MainThread]: Running with dbt=1.11.8
+[0m18:34:54.181458 [debug] [MainThread]: running dbt with arguments {'use_experimental_parser': 'False', 'empty': 'None', 'send_anonymous_usage_stats': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'indirect_selection': 'eager', 'fail_fast': 'False', 'version_check': 'True', 'log_format': 'default', 'printer_width': '80', 'no_print': 'None', 'introspect': 'True', 'use_colors': 'True', 'warn_error': 'None', 'partial_parse': 'True', 'invocation_command': 'dbt debug', 'static_parser': 'True', 'log_cache_events': 'False', 'profiles_dir': '/Users/heisenberg/.dbt', 'write_json': 'True', 'debug': 'False', 'quiet': 'False', 'cache_selected_only': 'False', 'log_path': 'logs'}
+[0m18:34:54.192182 [info ] [MainThread]: dbt version: 1.11.8
+[0m18:34:54.192464 [info ] [MainThread]: python version: 3.11.15
+[0m18:34:54.192714 [info ] [MainThread]: python path: /opt/homebrew/opt/python@3.11/bin/python3.11
+[0m18:34:54.192920 [info ] [MainThread]: os info: macOS-26.4.1-arm64-arm-64bit
+[0m18:34:54.482530 [debug] [MainThread]: Snowflake adapter: Setting snowflake.connector to ERROR (file logging only)
+[0m18:34:54.482929 [debug] [MainThread]: Snowflake adapter: Setting botocore to ERROR (file logging only)
+[0m18:34:54.483166 [debug] [MainThread]: Snowflake adapter: Setting boto3 to ERROR (file logging only)
+[0m18:34:54.531439 [info ] [MainThread]: Using profiles dir at /Users/heisenberg/.dbt
+[0m18:34:54.531741 [info ] [MainThread]: Using profiles.yml file at /Users/heisenberg/.dbt/profiles.yml
+[0m18:34:54.531952 [info ] [MainThread]: Using dbt_project.yml file at /Users/heisenberg/aviation-analytics/transformations/dbt_project.yml
+[0m18:34:54.532198 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m18:34:54.535448 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.4144662, "process_in_blocks": "0", "process_kernel_time": 0.223087, "process_mem_max_rss": "141082624", "process_out_blocks": "0", "process_user_time": 1.30964}
+[0m18:34:54.535918 [debug] [MainThread]: Command `dbt debug` failed at 18:34:54.535843 after 0.41 seconds
+[0m18:34:54.536185 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dedbf50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dedb950>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x109bc4ed0>]}
+[0m18:34:54.536463 [debug] [MainThread]: Flushing usage events
+[0m18:34:54.940602 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m18:36:34.420750 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dae8d90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dbc6dd0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dc43650>]}
+
+
+============================== 18:36:34.425011 | cbb5db0e-ed91-4805-acc3-94ada62efa14 ==============================
+[0m18:36:34.425011 [info ] [MainThread]: Running with dbt=1.11.8
+[0m18:36:34.425485 [debug] [MainThread]: running dbt with arguments {'cache_selected_only': 'False', 'partial_parse': 'True', 'target_path': 'None', 'no_print': 'None', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'quiet': 'False', 'printer_width': '80', 'fail_fast': 'False', 'use_colors': 'True', 'version_check': 'True', 'write_json': 'True', 'send_anonymous_usage_stats': 'True', 'invocation_command': 'dbt debug --profiles-dir /Users/heisenberg/.dbt', 'log_format': 'default', 'static_parser': 'True', 'empty': 'None', 'warn_error': 'None', 'debug': 'False', 'profiles_dir': '/Users/heisenberg/.dbt', 'log_path': 'logs', 'use_experimental_parser': 'False', 'introspect': 'True'}
+[0m18:36:34.437517 [info ] [MainThread]: dbt version: 1.11.8
+[0m18:36:34.437801 [info ] [MainThread]: python version: 3.11.15
+[0m18:36:34.438042 [info ] [MainThread]: python path: /opt/homebrew/opt/python@3.11/bin/python3.11
+[0m18:36:34.438240 [info ] [MainThread]: os info: macOS-26.4.1-arm64-arm-64bit
+[0m18:36:34.746018 [debug] [MainThread]: Snowflake adapter: Setting snowflake.connector to ERROR (file logging only)
+[0m18:36:34.746438 [debug] [MainThread]: Snowflake adapter: Setting botocore to ERROR (file logging only)
+[0m18:36:34.746675 [debug] [MainThread]: Snowflake adapter: Setting boto3 to ERROR (file logging only)
+[0m18:36:34.795543 [info ] [MainThread]: Using profiles dir at /Users/heisenberg/.dbt
+[0m18:36:34.795854 [info ] [MainThread]: Using profiles.yml file at /Users/heisenberg/.dbt/profiles.yml
+[0m18:36:34.796083 [info ] [MainThread]: Using dbt_project.yml file at /Users/heisenberg/aviation-analytics/transformations/dbt_project.yml
+[0m18:36:34.796327 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m18:36:34.799637 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_success": false, "command_wall_clock_time": 0.438381, "process_in_blocks": "0", "process_kernel_time": 0.260558, "process_mem_max_rss": "141393920", "process_out_blocks": "0", "process_user_time": 1.312595}
+[0m18:36:34.800083 [debug] [MainThread]: Command `dbt debug` failed at 18:36:34.800013 after 0.44 seconds
+[0m18:36:34.800338 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dc24550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10dc241d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10d96d9d0>]}
+[0m18:36:34.800616 [debug] [MainThread]: Flushing usage events
+[0m18:36:35.342041 [debug] [MainThread]: An error was encountered while trying to flush usage events
