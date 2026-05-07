@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 .dlt/secrets.toml
+dbt_packages/
+target/
