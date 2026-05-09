@@ -5,7 +5,7 @@ with source as (
 staged as (
     select
         -- surrogate key
-        {{ dbt_utils.generate_surrogate_key(['icao24', 'first_seen']) }} as flight_id,
+        {{ dbt_utils.generate_surrogate_key(['icao24', 'first_seen', 'flight_type']) }} as flight_id,
 
         -- identifiers
         icao24,
