@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_flights
+    description: >
+      Cleaned and typed flight records sourced from the OpenSky Network API.
+      Contains one row per arrival or departure event across 10 European airports,
+      loaded daily by the dlt ingestion pipeline.
+
+    columns:
+      - name: flight_id
+        description: Surrogate key derived from icao24 and first_seen.
+        tests:
+          - unique
+          - not_null
+
+      - name: icao24
+        description: 24-bit ICAO transponder address of the aircraft (hex string).
+        tests:
+          - not_null
+
+      - name: callsign
+        description: Flight callsign (up to 8 characters), trimmed of whitespace.
+
+      - name: flight_type
+        description: Whether this record represents an arrival or a departure.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['arrival', 'departure']
+
+      - name: airport_icao
+        description: >
+          ICAO code of the airport this record is indexed against —
+          the arrival airport for arrivals, the departure airport for departures.
+        tests:
+          - not_null
+
+      - name: est_departure_airport
+        description: ICAO code of the estimated departure airport.
+
+      - name: est_arrival_airport
+        description: ICAO code of the estimated arrival airport.
+
+      - name: first_seen_at
+        description: Estimated departure time, converted from a Unix timestamp.
+
+      - name: last_seen_at
+        description: Last time the aircraft was seen, converted from a Unix timestamp.
