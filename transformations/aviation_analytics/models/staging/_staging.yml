@@ -47,3 +47,41 @@ models:
 
       - name: last_seen_at
         description: Last time the aircraft was seen, converted from a Unix timestamp.
+
+  - name: stg_aircraft
+    description: >
+      Cleaned aircraft reference data sourced from the OpenSky Network aircraft database.
+      Contains one row per unique aircraft transponder address with manufacturer,
+      model, and operator information. Manufacturer names are normalised to resolve
+      crowdsourced spelling variants.
+
+    columns:
+      - name: icao24
+        description: 24-bit ICAO transponder address of the aircraft (hex string). Primary key.
+        tests:
+          - unique
+          - not_null
+
+      - name: manufacturer
+        description: >
+          Normalised manufacturer name. The top 6 commercial manufacturers (Airbus, Boeing,
+          Embraer, Bombardier, Dassault, Gulfstream) are standardised from crowdsourced
+          variants; all others are left as-is.
+
+      - name: model
+        description: Aircraft model designation as reported in the OpenSky database.
+
+      - name: typecode
+        description: ICAO aircraft type designator (e.g. A320, B738).
+
+      - name: operator
+        description: Name of the operating airline or organisation. Null if blank in source.
+
+      - name: operator_callsign
+        description: Radio telephony callsign of the operator. Null if blank in source.
+
+      - name: operator_icao
+        description: ICAO code of the operator airline. Null if blank in source.
+
+      - name: operator_iata
+        description: IATA code of the operator airline. Null if blank in source.
