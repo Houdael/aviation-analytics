@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: opensky
+    description: Raw flight data ingested from the OpenSky Network API via dlt.
+    database: "{{ target.database }}"
+    schema: raw
+    loaded_at_field: '"TO_TIMESTAMP(_dlt_load_id)"'
+    freshness:
+      warn_after: {count: 25, period: hour}
+      error_after: {count: 49, period: hour}
+
+    tables:
+      - name: flights
+        description: Arrivals and departures for 10 European airports, loaded daily.
+        columns:
+          - name: icao24
+            description: 24-bit ICAO transponder address of the aircraft (hex string).
+          - name: first_seen
+            description: Estimated departure time (Unix timestamp).
+          - name: est_departure_airport
+            description: ICAO code of the estimated departure airport.
+          - name: last_seen
+            description: Last time the aircraft was seen (Unix timestamp).
+          - name: est_arrival_airport
+            description: ICAO code of the estimated arrival airport.
+          - name: callsign
+            description: Flight callsign, up to 8 characters.
+          - name: est_departure_airport_horiz_distance
+            description: Horizontal distance to the departure airport in metres.
+          - name: est_departure_airport_vert_distance
+            description: Vertical distance to the departure airport in metres.
+          - name: est_arrival_airport_horiz_distance
+            description: Horizontal distance to the arrival airport in metres.
+          - name: est_arrival_airport_vert_distance
+            description: Vertical distance to the arrival airport in metres.
+          - name: departure_airport_candidates_count
+            description: Number of alternative departure airport candidates.
+          - name: arrival_airport_candidates_count
+            description: Number of alternative arrival airport candidates.
+          - name: flight_type
+            description: Whether this record is an arrival or a departure.

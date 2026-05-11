@@ -1,0 +1,11 @@
+icao_code,iata_code,name,city,country
+LFPG,CDG,Charles de Gaulle,Paris,France
+EGLL,LHR,Heathrow,London,United Kingdom
+EHAM,AMS,Schiphol,Amsterdam,Netherlands
+EDDF,FRA,Frankfurt,Frankfurt,Germany
+LEMD,MAD,Adolfo Suárez Barajas,Madrid,Spain
+LIRF,FCO,Leonardo da Vinci Fiumicino,Rome,Italy
+LEBL,BCN,El Prat,Barcelona,Spain
+EBBR,BRU,Brussels,Brussels,Belgium
+LSZH,ZRH,Zurich,Zurich,Switzerland
+LPPT,LIS,Humberto Delgado,Lisbon,Portugal

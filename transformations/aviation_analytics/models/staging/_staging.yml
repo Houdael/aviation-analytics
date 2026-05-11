@@ -1,0 +1,87 @@
+version: 2
+
+models:
+  - name: stg_flights
+    description: >
+      Cleaned and typed flight records sourced from the OpenSky Network API.
+      Contains one row per arrival or departure event across 10 European airports,
+      loaded daily by the dlt ingestion pipeline.
+
+    columns:
+      - name: flight_id
+        description: Surrogate key derived from icao24 and first_seen.
+        tests:
+          - unique
+          - not_null
+
+      - name: icao24
+        description: 24-bit ICAO transponder address of the aircraft (hex string).
+        tests:
+          - not_null
+
+      - name: callsign
+        description: Flight callsign (up to 8 characters), trimmed of whitespace.
+
+      - name: flight_type
+        description: Whether this record represents an arrival or a departure.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['arrival', 'departure']
+
+      - name: airport_icao
+        description: >
+          ICAO code of the airport this record is indexed against —
+          the arrival airport for arrivals, the departure airport for departures.
+        tests:
+          - not_null
+
+      - name: est_departure_airport
+        description: ICAO code of the estimated departure airport.
+
+      - name: est_arrival_airport
+        description: ICAO code of the estimated arrival airport.
+
+      - name: first_seen_at
+        description: Estimated departure time, converted from a Unix timestamp.
+
+      - name: last_seen_at
+        description: Last time the aircraft was seen, converted from a Unix timestamp.
+
+  - name: stg_aircraft
+    description: >
+      Cleaned aircraft reference data sourced from the OpenSky Network aircraft database.
+      Contains one row per unique aircraft transponder address with manufacturer,
+      model, and operator information. Manufacturer names are normalised to resolve
+      crowdsourced spelling variants.
+
+    columns:
+      - name: icao24
+        description: 24-bit ICAO transponder address of the aircraft (hex string). Primary key.
+        tests:
+          - unique
+          - not_null
+
+      - name: manufacturer
+        description: >
+          Normalised manufacturer name. The top 6 commercial manufacturers (Airbus, Boeing,
+          Embraer, Bombardier, Dassault, Gulfstream) are standardised from crowdsourced
+          variants; all others are left as-is.
+
+      - name: model
+        description: Aircraft model designation as reported in the OpenSky database.
+
+      - name: typecode
+        description: ICAO aircraft type designator (e.g. A320, B738).
+
+      - name: operator
+        description: Name of the operating airline or organisation. Null if blank in source.
+
+      - name: operator_callsign
+        description: Radio telephony callsign of the operator. Null if blank in source.
+
+      - name: operator_icao
+        description: ICAO code of the operator airline. Null if blank in source.
+
+      - name: operator_iata
+        description: IATA code of the operator airline. Null if blank in source.
