@@ -38,6 +38,24 @@ database = "AVIATION_ANALYTICS_DEV"
 
 To run against production intentionally, override the database at the CLI or via a separate secrets profile — never change the default in `secrets.toml`.
 
+## Architecture Decision Records
+
+### ADR-001 — No intermediate layer
+
+The staging-to-marts transformation logic is straightforward enough that an intermediate layer would add structural overhead without meaningful reuse. Models are kept flat and readable. If cross-mart reuse logic emerges in the future, an intermediate layer will be introduced at that point.
+
+### ADR-002 — dbt Snapshots for slow-changing dimensions
+
+dbt Snapshots will be used to track slow-changing dimensions, specifically aircraft operator changes over time. An aircraft can change airline, and capturing that history enables accurate historical analysis of airline reliability without data loss. Snapshots will be applied to the `stg_aircraft` model.
+
+### ADR-003 — dbt Docs generated in CI
+
+`dbt docs generate` will be run as part of the CI pipeline to produce a browsable data catalog on every merge. This automatically documents model lineage, column descriptions, and test coverage, keeping the catalog in sync with the codebase without manual effort.
+
+### ADR-004 — dbt Model Contracts on mart models
+
+Contracts will be enforced on all mart models to guarantee column-level stability. This prevents breaking changes (renamed or dropped columns) from reaching Power BI reports silently. Any intentional schema change on a mart model requires an explicit contract update, making it a deliberate and reviewable decision.
+
 ## Git conventions
 
 ### Commit message format
