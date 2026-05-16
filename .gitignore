@@ -5,3 +5,12 @@ __pycache__/
 .dlt/secrets.toml
 dbt_packages/
 target/
+.DS_Store
+**/.DS_Store
+.dlt/config.toml
+logs/
+.claude/
+aircraftDatabase.csv
+ingestion/aircraftDatabase.csv
+import
+dbt.log

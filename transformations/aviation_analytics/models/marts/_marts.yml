@@ -1,0 +1,309 @@
+version: 2
+
+models:
+  - name: fct_flights
+    description: >
+      Central fact table containing one row per flight event (arrival or departure)
+      across 10 major European airports. Loaded daily from the OpenSky Network API
+      and enriched with aircraft and airline information.
+
+    columns:
+      - name: flight_id
+        description: Surrogate key derived from icao24, first_seen and flight_type.
+        tests:
+          - unique
+          - not_null
+
+      - name: icao24
+        description: 24-bit ICAO transponder address of the aircraft (hex string).
+        tests:
+          - not_null
+
+      - name: callsign
+        description: Flight callsign, trimmed of whitespace.
+
+      - name: flight_type
+        description: Whether this record represents an arrival or a departure.
+
+      - name: airport_icao
+        description: ICAO code of the airport this record is indexed against.
+
+      - name: est_departure_airport
+        description: ICAO code of the estimated departure airport.
+
+      - name: est_arrival_airport
+        description: ICAO code of the estimated arrival airport.
+
+      - name: first_seen_at
+        description: Estimated departure time, converted from a Unix timestamp.
+
+      - name: last_seen_at
+        description: Last time the aircraft was seen, converted from a Unix timestamp.
+
+      - name: flight_duration_minutes
+        description: Flight duration in minutes, computed as last_seen_at minus first_seen_at.
+
+      - name: operator_icao
+        description: ICAO code of the operating airline, joined from the aircraft reference data.
+
+      - name: manufacturer
+        description: Normalised aircraft manufacturer name.
+
+      - name: model
+        description: Aircraft model designation.
+
+  - name: dim_airports
+    description: >
+      Airport dimension table built from the airports seed file.
+      Contains one row per airport in scope, with ICAO/IATA codes and location.
+
+    columns:
+      - name: airport_id
+        description: Surrogate key derived from icao_code.
+        tests:
+          - unique
+          - not_null
+
+      - name: icao_code
+        description: ICAO four-letter airport code. Natural key.
+        tests:
+          - unique
+          - not_null
+
+      - name: iata_code
+        description: IATA three-letter airport code.
+
+      - name: name
+        description: Full official name of the airport.
+
+      - name: city
+        description: City where the airport is located.
+
+      - name: country
+        description: Country where the airport is located.
+
+  - name: dim_airlines
+    description: >
+      Airline dimension table derived from the aircraft reference data.
+      Contains one row per unique operator ICAO code, deduplicated from stg_aircraft.
+
+    columns:
+      - name: airline_id
+        description: Surrogate key derived from operator_icao.
+        tests:
+          - unique
+          - not_null
+
+      - name: operator_icao
+        description: ICAO code of the airline. Natural key.
+        tests:
+          - unique
+          - not_null
+
+      - name: operator_iata
+        description: IATA code of the airline.
+
+      - name: airline_name
+        description: Full name of the airline or operating organisation.
+
+      - name: operator_callsign
+        description: Radio telephony callsign of the airline.
+
+  - name: mart_airport_traffic
+    description: >
+      Answers: "What is the traffic volume at each airport, by day and by week?"
+      Daily and weekly flight counts per airport, split by arrivals and departures.
+      Enriched with airport name and city from dim_airports. Powers the airport
+      traffic volume report in Power BI, enabling week-over-week and month-over-month
+      comparisons across the 10 European airports in scope.
+
+    columns:
+      - name: traffic_date
+        description: Date of the traffic record, truncated to day.
+
+      - name: traffic_week
+        description: Week of the traffic record, truncated to Monday.
+
+      - name: airport_icao
+        description: ICAO code of the airport.
+
+      - name: airport_iata
+        description: IATA code of the airport.
+
+      - name: airport_name
+        description: Full name of the airport.
+
+      - name: city
+        description: City where the airport is located.
+
+      - name: country
+        description: Country where the airport is located.
+
+      - name: arrivals
+        description: Number of arrival flights on this date.
+
+      - name: departures
+        description: Number of departure flights on this date.
+
+      - name: total_flights
+        description: Total number of flights (arrivals + departures) on this date.
+
+  - name: mart_route_popularity
+    description: >
+      Answers: "Which routes are the most active, and how has route popularity evolved over time?"
+      Aggregated flight counts per origin-destination route pair, with full airport name
+      and location for both endpoints. Filters out records where either airport is unknown.
+      Ordered by flight count descending so the busiest routes surface immediately in reports.
+      Covers both intra-European and international routes observed through the 10 monitored airports.
+
+    columns:
+      - name: departure_icao
+        description: ICAO code of the departure airport.
+
+      - name: departure_iata
+        description: IATA code of the departure airport.
+
+      - name: departure_airport_name
+        description: Full name of the departure airport.
+
+      - name: departure_city
+        description: City of the departure airport.
+
+      - name: departure_country
+        description: Country of the departure airport.
+
+      - name: arrival_icao
+        description: ICAO code of the arrival airport.
+
+      - name: arrival_iata
+        description: IATA code of the arrival airport.
+
+      - name: arrival_airport_name
+        description: Full name of the arrival airport.
+
+      - name: arrival_city
+        description: City of the arrival airport.
+
+      - name: arrival_country
+        description: Country of the arrival airport.
+
+      - name: flight_count
+        description: Total number of flights observed on this route.
+
+      - name: first_seen_date
+        description: Earliest date on which this route was observed.
+
+      - name: last_seen_date
+        description: Most recent date on which this route was observed.
+
+  - name: mart_airline_reliability
+    description: >
+      Answers: "Which airlines operate the most flights, and how do they compare on average flight duration?"
+      Airline-level aggregation of total arrivals, departures, and average flight duration.
+      Also tracks the number of active days per airline to distinguish consistently operating
+      carriers from occasional ones. Used to build airline operational reliability rankings
+      in Power BI, ordered by total flight volume descending.
+
+    columns:
+      - name: airline_id
+        description: Surrogate key from dim_airlines.
+
+      - name: operator_icao
+        description: ICAO code of the airline.
+
+      - name: operator_iata
+        description: IATA code of the airline.
+
+      - name: airline_name
+        description: Full name of the airline.
+
+      - name: operator_callsign
+        description: Radio telephony callsign of the airline.
+
+      - name: total_flights
+        description: Total number of flight events (arrivals and departures combined).
+
+      - name: total_departures
+        description: Total number of departure events.
+
+      - name: total_arrivals
+        description: Total number of arrival events.
+
+      - name: avg_flight_duration_minutes
+        description: Average flight duration in minutes, rounded to one decimal place.
+
+      - name: active_days
+        description: Number of distinct days on which the airline was observed.
+
+  - name: mart_on_time_performance
+    description: >
+      Answers: "How does flight duration vary by airline and route, and which airline-route combinations are the most consistent?"
+      Average, minimum and maximum flight duration per airline per route combination.
+      Only includes records where both airports are known and duration is positive.
+      The spread between min and max duration for a given route is a proxy for schedule
+      consistency — a wide spread indicates high variability. Powers the on-time performance
+      report in Power BI, enabling comparison across airlines on the same route.
+
+    columns:
+      - name: airline_id
+        description: Surrogate key from dim_airlines.
+
+      - name: operator_icao
+        description: ICAO code of the airline.
+
+      - name: operator_iata
+        description: IATA code of the airline.
+
+      - name: airline_name
+        description: Full name of the airline.
+
+      - name: departure_icao
+        description: ICAO code of the departure airport.
+
+      - name: arrival_icao
+        description: ICAO code of the arrival airport.
+
+      - name: flight_count
+        description: Number of flights observed on this airline-route combination.
+
+      - name: avg_flight_duration_minutes
+        description: Average flight duration in minutes, rounded to one decimal place.
+
+      - name: min_flight_duration_minutes
+        description: Shortest observed flight duration in minutes, rounded to one decimal place.
+
+      - name: max_flight_duration_minutes
+        description: Longest observed flight duration in minutes, rounded to one decimal place.
+
+  - name: mart_traffic_patterns
+    description: >
+      Answers: "At what times of day is each airport busiest, and how do arrival and departure patterns differ?"
+      Flight counts broken down by airport, date, hour of day, and flight type (arrival/departure).
+      Enables intra-day traffic analysis to identify morning departure peaks, afternoon arrival
+      surges, and quiet overnight windows. Used in Power BI to visualise hourly heatmaps per
+      airport and support operational planning insights.
+
+    columns:
+      - name: traffic_date
+        description: Date of the record, truncated to day.
+
+      - name: hour_of_day
+        description: Hour of the day (0–23) extracted from first_seen_at.
+
+      - name: airport_icao
+        description: ICAO code of the airport.
+
+      - name: airport_iata
+        description: IATA code of the airport.
+
+      - name: airport_name
+        description: Full name of the airport.
+
+      - name: city
+        description: City where the airport is located.
+
+      - name: flight_type
+        description: Whether the flights counted are arrivals or departures.
+
+      - name: flight_count
+        description: Number of flights observed in this hour at this airport.
