@@ -171,6 +171,9 @@ dbt test
 |-----------|--------|
 | dlt ingestion pipeline | ✅ Complete |
 | dbt staging layer | ✅ Complete |
-| dbt marts layer | 🚧 In progress |
+| dbt marts layer | ✅ Complete |
+| dbt docs | ✅ Complete |
 | Dagster orchestration | 📋 Planned |
+| Snowflake Cortex AI layer | 📋 Planned |
 | Power BI reports | 📋 Planned |
+| GitHub Actions CI/CD | 📋 Planned |
