@@ -8,7 +8,8 @@
 | Data warehouse | Snowflake |
 | Transformation | dbt |
 | Orchestration | Dagster |
-| Reporting | Power BI |
+| CI/CD | GitHub Actions |
+| Reporting | Streamlit |
 
 ## Environments
 
@@ -38,6 +39,45 @@ database = "AVIATION_ANALYTICS_DEV"
 
 To run against production intentionally, override the database at the CLI or via a separate secrets profile — never change the default in `secrets.toml`.
 
+### dbt profiles.yml
+
+A `profiles.yml` file is committed at `transformations/aviation_analytics/profiles.yml` and used in CI via `--profiles-dir .`. It reads all sensitive values from environment variables using `env_var()`. You do not need a `~/.dbt/profiles.yml` locally — set the required environment variables instead:
+
+```bash
+export SNOWFLAKE_ACCOUNT=your_account
+export SNOWFLAKE_USER=your_user
+export DBT_SNOWFLAKE_PASSWORD=your_password
+```
+
+## GitHub Actions
+
+### Schedule trigger and default branch
+
+The `daily_pipeline.yml` schedule trigger (`cron`) only fires on the **default branch** (usually `main`). Pushing the workflow to a feature branch will not activate the schedule — it must be merged to the default branch first. Use `workflow_dispatch` to trigger it manually from any branch.
+
+### dlt Snowflake credentials in CI
+
+dlt reads Snowflake credentials from environment variables using double-underscore `__` as a separator for nested config keys:
+
+```
+DESTINATION__SNOWFLAKE__CREDENTIALS__DATABASE
+DESTINATION__SNOWFLAKE__CREDENTIALS__USERNAME
+DESTINATION__SNOWFLAKE__CREDENTIALS__PASSWORD
+DESTINATION__SNOWFLAKE__CREDENTIALS__HOST
+DESTINATION__SNOWFLAKE__CREDENTIALS__WAREHOUSE
+DESTINATION__SNOWFLAKE__CREDENTIALS__ROLE
+```
+
+**Important:** `DESTINATION__SNOWFLAKE__CREDENTIALS__HOST` must be the bare account identifier only — do **not** append `.snowflakecomputing.com`. dlt adds the suffix automatically.
+
+```yaml
+# ✅ correct
+DESTINATION__SNOWFLAKE__CREDENTIALS__HOST: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+
+# ❌ incorrect — causes connection failure
+DESTINATION__SNOWFLAKE__CREDENTIALS__HOST: ${{ secrets.SNOWFLAKE_ACCOUNT }}.snowflakecomputing.com
+```
+
 ## Architecture Decision Records
 
 ### ADR-001 — No intermediate layer
@@ -54,7 +94,7 @@ dbt Snapshots will be used to track slow-changing dimensions, specifically aircr
 
 ### ADR-004 — dbt Model Contracts on mart models
 
-Contracts will be enforced on all mart models to guarantee column-level stability. This prevents breaking changes (renamed or dropped columns) from reaching Power BI reports silently. Any intentional schema change on a mart model requires an explicit contract update, making it a deliberate and reviewable decision.
+Contracts will be enforced on all mart models to guarantee column-level stability. This prevents breaking changes (renamed or dropped columns) from reaching downstream consumers (Streamlit, Snowflake Cortex) silently. Any intentional schema change on a mart model requires an explicit contract update, making it a deliberate and reviewable decision.
 
 ## Git conventions
 

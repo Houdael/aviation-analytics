@@ -40,7 +40,7 @@ End-to-end aviation analytics platform tracking daily flight activity across 10 
 | Transformation | dbt |
 | Orchestration | Dagster |
 | AI / enrichment | Snowflake Cortex |
-| Reporting | Power BI |
+| Reporting | Streamlit |
 
 ---
 
@@ -62,7 +62,7 @@ STAGING schema   (cleaned, typed, surrogate keys)
   MARTS schema   (aggregated, business-ready models)
         │
         ▼
-    Power BI
+    Streamlit
 ```
 
 Snowflake hosts three schemas in two databases:
@@ -90,10 +90,20 @@ aviation-analytics/
 ├── transformations/
 │   └── aviation_analytics/           # dbt project
 │       ├── models/
-│       │   └── staging/              # staging layer
+│       │   ├── staging/              # staging layer
+│       │   └── marts/                # marts layer
 │       ├── seeds/                    # static reference data
 │       └── macros/
-└── orchestration/                    # Dagster jobs (coming soon)
+├── orchestration/
+│   └── aviation_analytics/           # Dagster project
+│       └── aviation_analytics/
+│           ├── assets.py
+│           └── definitions.py
+├── .github/
+│   └── workflows/
+│       ├── daily_pipeline.yml        # scheduled ingestion + dbt run
+│       └── ci.yml                    # dbt compile + test on every push
+└── streamlit_app.py                  # Streamlit dashboard
 ```
 
 ---
@@ -173,7 +183,7 @@ dbt test
 | dbt staging layer | ✅ Complete |
 | dbt marts layer | ✅ Complete |
 | dbt docs | ✅ Complete |
-| Dagster orchestration | 📋 Planned |
+| Dagster orchestration | ✅ Complete |
+| GitHub Actions CI/CD | ✅ Complete |
+| Streamlit dashboard | ✅ Complete |
 | Snowflake Cortex AI layer | 📋 Planned |
-| Power BI reports | 📋 Planned |
-| GitHub Actions CI/CD | 📋 Planned |
