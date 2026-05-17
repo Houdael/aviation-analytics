@@ -38,12 +38,12 @@ jobs:
 
       - name: Install dbt packages
         working-directory: transformations/aviation_analytics
-        run: dbt deps
+        run: dbt deps --profiles-dir .
 
       - name: Run dbt models
         working-directory: transformations/aviation_analytics
-        run: dbt run
+        run: dbt run --profiles-dir .
 
       - name: Run dbt tests
         working-directory: transformations/aviation_analytics
-        run: dbt test
+        run: dbt test --profiles-dir .
