@@ -4,6 +4,12 @@ End-to-end aviation analytics platform tracking daily flight activity across 10 
 
 ---
 
+## Live Demo
+
+🔗 [https://aviation-analytics-hel.streamlit.app](https://aviation-analytics-hel.streamlit.app)
+
+---
+
 ## Business questions
 
 - **On-time performance** — which airlines and routes are most punctual?
