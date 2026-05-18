@@ -1,0 +1,418 @@
+name: aviation_analytics
+description: >
+  Semantic model for the Aviation Analytics Platform. Covers daily flight activity
+  across 10 major European airports, sourced from the OpenSky Network API.
+  Enables natural-language analysis of airport traffic, route popularity,
+  airline reliability, and on-time performance.
+
+tables:
+
+  - name: fct_flights
+    description: >
+      Central fact table. One row per flight event (arrival or departure) across
+      10 European airports, loaded daily. Joins to dim_airports on airport_icao
+      and to dim_airlines on operator_icao.
+    base_table:
+      database: AVIATION_ANALYTICS_DEV
+      schema: MARTS
+      table: FCT_FLIGHTS
+    primary_key:
+      columns:
+        - flight_id
+    dimensions:
+      - name: flight_id
+        description: Surrogate key — unique identifier for each flight event.
+        expr: flight_id
+        data_type: VARCHAR
+      - name: icao24
+        description: 24-bit ICAO transponder address of the aircraft (hex string).
+        expr: icao24
+        data_type: VARCHAR
+      - name: callsign
+        description: Flight callsign, trimmed of whitespace.
+        expr: callsign
+        data_type: VARCHAR
+      - name: flight_type
+        description: Whether the event is an arrival or a departure.
+        expr: flight_type
+        data_type: VARCHAR
+      - name: airport_icao
+        description: ICAO code of the airport this record is indexed against.
+        expr: airport_icao
+        data_type: VARCHAR
+      - name: est_departure_airport
+        description: ICAO code of the estimated departure airport.
+        expr: est_departure_airport
+        data_type: VARCHAR
+      - name: est_arrival_airport
+        description: ICAO code of the estimated arrival airport.
+        expr: est_arrival_airport
+        data_type: VARCHAR
+      - name: operator_icao
+        description: ICAO code of the operating airline.
+        expr: operator_icao
+        data_type: VARCHAR
+      - name: manufacturer
+        description: Normalised aircraft manufacturer name.
+        expr: manufacturer
+        data_type: VARCHAR
+      - name: model
+        description: Aircraft model designation.
+        expr: model
+        data_type: VARCHAR
+    time_dimensions:
+      - name: first_seen_at
+        description: Estimated departure time.
+        expr: first_seen_at
+        data_type: TIMESTAMP
+      - name: last_seen_at
+        description: Last time the aircraft was seen.
+        expr: last_seen_at
+        data_type: TIMESTAMP
+    measures:
+      - name: flight_count
+        description: Total number of flight events.
+        expr: COUNT(flight_id)
+        data_type: NUMBER
+        default_aggregation: count
+      - name: avg_flight_duration_minutes
+        description: Average flight duration in minutes.
+        expr: AVG(flight_duration_minutes)
+        data_type: FLOAT
+        default_aggregation: avg
+      - name: total_flight_duration_minutes
+        description: Total flight duration in minutes.
+        expr: SUM(flight_duration_minutes)
+        data_type: FLOAT
+        default_aggregation: sum
+
+  - name: dim_airports
+    description: >
+      Airport dimension. One row per airport in scope with ICAO/IATA codes
+      and location details. Built from the airports seed file.
+    base_table:
+      database: AVIATION_ANALYTICS_DEV
+      schema: MARTS
+      table: DIM_AIRPORTS
+    primary_key:
+      columns:
+        - airport_id
+    dimensions:
+      - name: airport_id
+        description: Surrogate key derived from icao_code.
+        expr: airport_id
+        data_type: VARCHAR
+      - name: icao_code
+        description: ICAO four-letter airport code.
+        expr: icao_code
+        data_type: VARCHAR
+      - name: iata_code
+        description: IATA three-letter airport code.
+        expr: iata_code
+        data_type: VARCHAR
+      - name: name
+        description: Full official name of the airport.
+        expr: name
+        data_type: VARCHAR
+      - name: city
+        description: City where the airport is located.
+        expr: city
+        data_type: VARCHAR
+      - name: country
+        description: Country where the airport is located.
+        expr: country
+        data_type: VARCHAR
+
+  - name: dim_airlines
+    description: >
+      Airline dimension. One row per unique operator ICAO code, deduplicated
+      from aircraft reference data.
+    base_table:
+      database: AVIATION_ANALYTICS_DEV
+      schema: MARTS
+      table: DIM_AIRLINES
+    primary_key:
+      columns:
+        - airline_id
+    dimensions:
+      - name: airline_id
+        description: Surrogate key derived from operator_icao.
+        expr: airline_id
+        data_type: VARCHAR
+      - name: operator_icao
+        description: ICAO code of the airline.
+        expr: operator_icao
+        data_type: VARCHAR
+      - name: operator_iata
+        description: IATA code of the airline.
+        expr: operator_iata
+        data_type: VARCHAR
+      - name: airline_name
+        description: Full name of the airline.
+        expr: airline_name
+        data_type: VARCHAR
+      - name: operator_callsign
+        description: Radio telephony callsign of the airline.
+        expr: operator_callsign
+        data_type: VARCHAR
+
+  - name: mart_airport_traffic
+    description: >
+      Daily and weekly flight counts per airport, split by arrivals and departures.
+      Answers: what is the traffic volume at each airport by day and by week?
+    base_table:
+      database: AVIATION_ANALYTICS_DEV
+      schema: MARTS
+      table: MART_AIRPORT_TRAFFIC
+    primary_key:
+      columns:
+        - airport_icao
+        - traffic_date
+    dimensions:
+      - name: airport_icao
+        description: ICAO code of the airport.
+        expr: airport_icao
+        data_type: VARCHAR
+      - name: airport_iata
+        description: IATA code of the airport.
+        expr: airport_iata
+        data_type: VARCHAR
+      - name: airport_name
+        description: Full name of the airport.
+        expr: airport_name
+        data_type: VARCHAR
+      - name: city
+        description: City where the airport is located.
+        expr: city
+        data_type: VARCHAR
+      - name: country
+        description: Country where the airport is located.
+        expr: country
+        data_type: VARCHAR
+    time_dimensions:
+      - name: traffic_date
+        description: Date of the traffic record, truncated to day.
+        expr: traffic_date
+        data_type: DATE
+      - name: traffic_week
+        description: Week of the traffic record, truncated to Monday.
+        expr: traffic_week
+        data_type: DATE
+    measures:
+      - name: total_flights
+        description: Total number of flights (arrivals + departures).
+        expr: SUM(total_flights)
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: total_arrivals
+        description: Total number of arrival flights.
+        expr: SUM(arrivals)
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: total_departures
+        description: Total number of departure flights.
+        expr: SUM(departures)
+        data_type: NUMBER
+        default_aggregation: sum
+
+  - name: mart_airline_reliability
+    description: >
+      Airline-level aggregation of total flights and average flight duration.
+      Answers: which airlines operate the most flights, and how do they compare
+      on average flight duration and active days?
+    base_table:
+      database: AVIATION_ANALYTICS_DEV
+      schema: MARTS
+      table: MART_AIRLINE_RELIABILITY
+    primary_key:
+      columns:
+        - operator_icao
+    dimensions:
+      - name: airline_id
+        description: Surrogate key from dim_airlines.
+        expr: airline_id
+        data_type: VARCHAR
+      - name: operator_icao
+        description: ICAO code of the airline.
+        expr: operator_icao
+        data_type: VARCHAR
+      - name: operator_iata
+        description: IATA code of the airline.
+        expr: operator_iata
+        data_type: VARCHAR
+      - name: airline_name
+        description: Full name of the airline.
+        expr: airline_name
+        data_type: VARCHAR
+      - name: operator_callsign
+        description: Radio telephony callsign of the airline.
+        expr: operator_callsign
+        data_type: VARCHAR
+    measures:
+      - name: total_flights
+        description: Total number of flight events.
+        expr: total_flights
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: total_arrivals
+        description: Total number of arrival events.
+        expr: total_arrivals
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: total_departures
+        description: Total number of departure events.
+        expr: total_departures
+        data_type: NUMBER
+        default_aggregation: sum
+      - name: avg_flight_duration_minutes
+        description: Average flight duration in minutes.
+        expr: avg_flight_duration_minutes
+        data_type: FLOAT
+        default_aggregation: avg
+      - name: active_days
+        description: Number of distinct days on which the airline was observed.
+        expr: active_days
+        data_type: NUMBER
+        default_aggregation: sum
+
+  - name: mart_route_popularity
+    description: >
+      Aggregated flight counts per origin-destination route pair.
+      Answers: which routes are the most active, and how has route popularity
+      evolved over time?
+    base_table:
+      database: AVIATION_ANALYTICS_DEV
+      schema: MARTS
+      table: MART_ROUTE_POPULARITY
+    primary_key:
+      columns:
+        - departure_icao
+        - arrival_icao
+    dimensions:
+      - name: departure_icao
+        description: ICAO code of the departure airport.
+        expr: departure_icao
+        data_type: VARCHAR
+      - name: departure_iata
+        description: IATA code of the departure airport.
+        expr: departure_iata
+        data_type: VARCHAR
+      - name: departure_airport_name
+        description: Full name of the departure airport.
+        expr: departure_airport_name
+        data_type: VARCHAR
+      - name: departure_city
+        description: City of the departure airport.
+        expr: departure_city
+        data_type: VARCHAR
+      - name: departure_country
+        description: Country of the departure airport.
+        expr: departure_country
+        data_type: VARCHAR
+      - name: arrival_icao
+        description: ICAO code of the arrival airport.
+        expr: arrival_icao
+        data_type: VARCHAR
+      - name: arrival_iata
+        description: IATA code of the arrival airport.
+        expr: arrival_iata
+        data_type: VARCHAR
+      - name: arrival_airport_name
+        description: Full name of the arrival airport.
+        expr: arrival_airport_name
+        data_type: VARCHAR
+      - name: arrival_city
+        description: City of the arrival airport.
+        expr: arrival_city
+        data_type: VARCHAR
+      - name: arrival_country
+        description: Country of the arrival airport.
+        expr: arrival_country
+        data_type: VARCHAR
+    time_dimensions:
+      - name: first_seen_date
+        description: Earliest date on which this route was observed.
+        expr: first_seen_date
+        data_type: DATE
+      - name: last_seen_date
+        description: Most recent date on which this route was observed.
+        expr: last_seen_date
+        data_type: DATE
+    measures:
+      - name: flight_count
+        description: Total number of flights observed on this route.
+        expr: flight_count
+        data_type: NUMBER
+        default_aggregation: sum
+
+verified_queries:
+
+  - name: busiest_airports
+    question: Which airports have the most total flights?
+    sql: >
+      SELECT airport_name, city, SUM(total_flights) AS total_flights
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_AIRPORT_TRAFFIC
+      GROUP BY airport_name, city
+      ORDER BY total_flights DESC
+
+  - name: top_routes
+    question: What are the 10 most popular routes?
+    sql: >
+      SELECT departure_iata, arrival_iata, departure_city, arrival_city, flight_count
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_ROUTE_POPULARITY
+      ORDER BY flight_count DESC
+      LIMIT 10
+
+  - name: most_active_airlines
+    question: Which airlines operate the most flights?
+    sql: >
+      SELECT airline_name, operator_iata, total_flights, avg_flight_duration_minutes
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_AIRLINE_RELIABILITY
+      WHERE airline_name IS NOT NULL
+      ORDER BY total_flights DESC
+      LIMIT 20
+
+  - name: daily_traffic_heathrow
+    question: How many flights does Heathrow handle per day on average?
+    sql: >
+      SELECT AVG(total_flights) AS avg_daily_flights
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_AIRPORT_TRAFFIC
+      WHERE airport_iata = 'LHR'
+
+  - name: arrivals_vs_departures_by_airport
+    question: What is the ratio of arrivals to departures per airport?
+    sql: >
+      SELECT
+        airport_iata,
+        airport_name,
+        SUM(arrivals)    AS total_arrivals,
+        SUM(departures)  AS total_departures,
+        ROUND(SUM(arrivals) / NULLIF(SUM(departures), 0), 2) AS arrival_departure_ratio
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_AIRPORT_TRAFFIC
+      GROUP BY airport_iata, airport_name
+      ORDER BY total_arrivals DESC
+
+  - name: weekly_traffic_trend
+    question: How has total weekly traffic evolved over time?
+    sql: >
+      SELECT traffic_week, SUM(total_flights) AS total_flights
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_AIRPORT_TRAFFIC
+      GROUP BY traffic_week
+      ORDER BY traffic_week
+
+  - name: routes_from_paris
+    question: What are the most popular routes departing from Paris CDG?
+    sql: >
+      SELECT arrival_iata, arrival_city, arrival_country, flight_count
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_ROUTE_POPULARITY
+      WHERE departure_iata = 'CDG'
+      ORDER BY flight_count DESC
+
+  - name: airline_avg_duration
+    question: Which airlines have the longest average flight duration?
+    sql: >
+      SELECT airline_name, operator_iata, avg_flight_duration_minutes, total_flights
+      FROM AVIATION_ANALYTICS_DEV.MARTS.MART_AIRLINE_RELIABILITY
+      WHERE airline_name IS NOT NULL AND total_flights > 10
+      ORDER BY avg_flight_duration_minutes DESC
+      LIMIT 15
