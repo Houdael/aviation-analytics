@@ -290,7 +290,7 @@ elif page == "Ask Cortex":
     CORTEX_ANALYST_ENDPOINT = (
         "https://{account}.snowflakecomputing.com/api/v2/cortex/analyst/message"
     )
-    SEMANTIC_MODEL = "AVIATION_ANALYTICS_DEV.MARTS.SEM_AVIATION_ANALYTICS"
+    SEMANTIC_VIEW = "AVIATION_ANALYTICS_DEV.MARTS.SEM_AVIATION_ANALYTICS"
 
     def call_cortex_analyst(question: str) -> dict:
         conn = get_connection()
@@ -310,7 +310,7 @@ elif page == "Ask Cortex":
                     "content": [{"type": "text", "text": question}],
                 }
             ],
-            "semantic_model": SEMANTIC_MODEL,
+            "semantic_view": SEMANTIC_VIEW,
         }
         response = requests.post(url, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
