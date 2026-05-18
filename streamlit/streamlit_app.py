@@ -1,3 +1,4 @@
+import json
 import os
 
 import pandas as pd
@@ -314,7 +315,15 @@ elif page == "Ask Cortex":
         }
         response = requests.post(url, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
-        return response.json()
+
+        raw = response.text
+
+        try:
+            result = json.loads(raw) if isinstance(raw, str) else response.json()
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Could not parse Cortex API response as JSON: {e}\n\nRaw: {raw}")
+
+        return result
 
     question = st.text_input(
         "Your question",
