@@ -11,7 +11,7 @@ import streamlit as st
 # Connection
 # ---------------------------------------------------------------------------
 
-@st.cache_resource
+@st.cache_resource(ttl=3600)
 def get_connection():
     return snowflake.connector.connect(
         account=os.environ["SNOWFLAKE_ACCOUNT"],
