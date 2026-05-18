@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 import plotly.express as px
+import requests
 import snowflake.connector
 import streamlit as st
 
@@ -40,7 +41,7 @@ st.set_page_config(
 st.sidebar.title("✈️ Aviation Analytics")
 page = st.sidebar.radio(
     "Navigate to",
-    ["Airport Traffic", "Route Popularity", "Airline Reliability", "Traffic Patterns"],
+    ["Airport Traffic", "Route Popularity", "Airline Reliability", "Traffic Patterns", "Ask Cortex"],
 )
 
 # ---------------------------------------------------------------------------
@@ -274,3 +275,81 @@ elif page == "Traffic Patterns":
     )
     fig2.update_xaxes(dtick=1)
     st.plotly_chart(fig2, use_container_width=True)
+
+# ---------------------------------------------------------------------------
+# Page 5 — Ask Cortex
+# ---------------------------------------------------------------------------
+
+elif page == "Ask Cortex":
+    st.title("🤖 Ask Cortex")
+    st.caption(
+        "Ask a question in plain English. Snowflake Cortex Analyst will generate "
+        "the SQL and run it against the aviation analytics semantic model."
+    )
+
+    CORTEX_ANALYST_ENDPOINT = (
+        "https://{account}.snowflakecomputing.com/api/v2/cortex/analyst/message"
+    )
+    SEMANTIC_MODEL = "AVIATION_ANALYTICS_DEV.MARTS.SEM_AVIATION_ANALYTICS"
+
+    def call_cortex_analyst(question: str) -> dict:
+        conn = get_connection()
+        account = os.environ["SNOWFLAKE_ACCOUNT"]
+        token = conn._rest._token  # session token from the active connector session
+
+        url = CORTEX_ANALYST_ENDPOINT.format(account=account)
+        headers = {
+            "Authorization": f'Snowflake Token="{token}"',
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        payload = {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": question}],
+                }
+            ],
+            "semantic_model": SEMANTIC_MODEL,
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
+        response.raise_for_status()
+        return response.json()
+
+    question = st.text_input(
+        "Your question",
+        placeholder="e.g. Which airport had the most flights last week?",
+    )
+
+    if st.button("Ask", type="primary") and question.strip():
+        with st.spinner("Cortex is thinking..."):
+            try:
+                result = call_cortex_analyst(question.strip())
+
+                # Extract generated SQL from response
+                sql = None
+                for item in result.get("message", {}).get("content", []):
+                    if item.get("type") == "sql":
+                        sql = item.get("statement")
+                        break
+
+                if sql:
+                    st.subheader("Generated SQL")
+                    st.code(sql, language="sql")
+
+                    st.subheader("Results")
+                    df = run_query(sql)
+                    if df.empty:
+                        st.info("The query returned no results.")
+                    else:
+                        st.dataframe(df, use_container_width=True, hide_index=True)
+                else:
+                    # Cortex returned a text response instead of SQL
+                    for item in result.get("message", {}).get("content", []):
+                        if item.get("type") == "text":
+                            st.info(item.get("text", "No answer returned."))
+
+            except requests.HTTPError as e:
+                st.error(f"Cortex Analyst API error: {e.response.status_code} — {e.response.text}")
+            except Exception as e:
+                st.error(f"Unexpected error: {e}")
