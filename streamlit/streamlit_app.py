@@ -23,7 +23,7 @@ def get_connection():
     )
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def run_query(query):
     conn = get_connection()
     return pd.read_sql(query, conn)
