@@ -10,6 +10,12 @@ End-to-end aviation analytics platform tracking daily flight activity across 10 
 
 ---
 
+## Documentation
+
+📚 [https://houdael.github.io/aviation-analytics](https://houdael.github.io/aviation-analytics) — dbt docs: model lineage, column descriptions, and test coverage, auto-deployed on every push to `develop`.
+
+---
+
 ## Business questions
 
 - **On-time performance** — which airlines and routes are most punctual?
@@ -188,7 +194,7 @@ dbt test
 | dlt ingestion pipeline | ✅ Complete |
 | dbt staging layer | ✅ Complete |
 | dbt marts layer | ✅ Complete |
-| dbt docs | ✅ Complete |
+| dbt docs | ✅ Complete — [houdael.github.io/aviation-analytics](https://houdael.github.io/aviation-analytics) |
 | Dagster orchestration | ✅ Complete |
 | GitHub Actions CI/CD | ✅ Complete |
 | Streamlit dashboard | ✅ Complete |
