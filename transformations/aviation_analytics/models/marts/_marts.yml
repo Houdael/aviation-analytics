@@ -116,37 +116,50 @@ models:
       Enriched with airport name and city from dim_airports. Powers the airport
       traffic volume report in Power BI, enabling week-over-week and month-over-month
       comparisons across the 10 European airports in scope.
+    config:
+      contract:
+        enforced: true
 
     columns:
       - name: traffic_date
         description: Date of the traffic record, truncated to day.
+        data_type: timestamp_ntz
 
       - name: traffic_week
         description: Week of the traffic record, truncated to Monday.
+        data_type: timestamp_ntz
 
       - name: airport_icao
         description: ICAO code of the airport.
+        data_type: varchar
 
       - name: airport_iata
         description: IATA code of the airport.
+        data_type: varchar
 
       - name: airport_name
         description: Full name of the airport.
+        data_type: varchar
 
       - name: city
         description: City where the airport is located.
+        data_type: varchar
 
       - name: country
         description: Country where the airport is located.
+        data_type: varchar
 
       - name: arrivals
         description: Number of arrival flights on this date.
+        data_type: number
 
       - name: departures
         description: Number of departure flights on this date.
+        data_type: number
 
       - name: total_flights
         description: Total number of flights (arrivals + departures) on this date.
+        data_type: number
 
   - name: mart_route_popularity
     description: >
@@ -155,46 +168,62 @@ models:
       and location for both endpoints. Filters out records where either airport is unknown.
       Ordered by flight count descending so the busiest routes surface immediately in reports.
       Covers both intra-European and international routes observed through the 10 monitored airports.
+    config:
+      contract:
+        enforced: true
 
     columns:
       - name: departure_icao
         description: ICAO code of the departure airport.
+        data_type: varchar
 
       - name: departure_iata
         description: IATA code of the departure airport.
+        data_type: varchar
 
       - name: departure_airport_name
         description: Full name of the departure airport.
+        data_type: varchar
 
       - name: departure_city
         description: City of the departure airport.
+        data_type: varchar
 
       - name: departure_country
         description: Country of the departure airport.
+        data_type: varchar
 
       - name: arrival_icao
         description: ICAO code of the arrival airport.
+        data_type: varchar
 
       - name: arrival_iata
         description: IATA code of the arrival airport.
+        data_type: varchar
 
       - name: arrival_airport_name
         description: Full name of the arrival airport.
+        data_type: varchar
 
       - name: arrival_city
         description: City of the arrival airport.
+        data_type: varchar
 
       - name: arrival_country
         description: Country of the arrival airport.
+        data_type: varchar
 
       - name: flight_count
         description: Total number of flights observed on this route.
+        data_type: number
 
       - name: first_seen_date
         description: Earliest date on which this route was observed.
+        data_type: timestamp_ntz
 
       - name: last_seen_date
         description: Most recent date on which this route was observed.
+        data_type: timestamp_ntz
 
   - name: mart_airline_reliability
     description: >
@@ -203,37 +232,50 @@ models:
       Also tracks the number of active days per airline to distinguish consistently operating
       carriers from occasional ones. Used to build airline operational reliability rankings
       in Power BI, ordered by total flight volume descending.
+    config:
+      contract:
+        enforced: true
 
     columns:
       - name: airline_id
         description: Surrogate key from dim_airlines.
+        data_type: varchar
 
       - name: operator_icao
         description: ICAO code of the airline.
+        data_type: varchar
 
       - name: operator_iata
         description: IATA code of the airline.
+        data_type: varchar
 
       - name: airline_name
         description: Full name of the airline.
+        data_type: varchar
 
       - name: operator_callsign
         description: Radio telephony callsign of the airline.
+        data_type: varchar
 
       - name: total_flights
         description: Total number of flight events (arrivals and departures combined).
+        data_type: number
 
       - name: total_departures
         description: Total number of departure events.
+        data_type: number
 
       - name: total_arrivals
         description: Total number of arrival events.
+        data_type: number
 
       - name: avg_flight_duration_minutes
         description: Average flight duration in minutes, rounded to one decimal place.
+        data_type: number
 
       - name: active_days
         description: Number of distinct days on which the airline was observed.
+        data_type: number
 
   - name: mart_on_time_performance
     description: >
@@ -243,37 +285,50 @@ models:
       The spread between min and max duration for a given route is a proxy for schedule
       consistency — a wide spread indicates high variability. Powers the on-time performance
       report in Power BI, enabling comparison across airlines on the same route.
+    config:
+      contract:
+        enforced: true
 
     columns:
       - name: airline_id
         description: Surrogate key from dim_airlines.
+        data_type: varchar
 
       - name: operator_icao
         description: ICAO code of the airline.
+        data_type: varchar
 
       - name: operator_iata
         description: IATA code of the airline.
+        data_type: varchar
 
       - name: airline_name
         description: Full name of the airline.
+        data_type: varchar
 
       - name: departure_icao
         description: ICAO code of the departure airport.
+        data_type: varchar
 
       - name: arrival_icao
         description: ICAO code of the arrival airport.
+        data_type: varchar
 
       - name: flight_count
         description: Number of flights observed on this airline-route combination.
+        data_type: number
 
       - name: avg_flight_duration_minutes
         description: Average flight duration in minutes, rounded to one decimal place.
+        data_type: number
 
       - name: min_flight_duration_minutes
         description: Shortest observed flight duration in minutes, rounded to one decimal place.
+        data_type: number
 
       - name: max_flight_duration_minutes
         description: Longest observed flight duration in minutes, rounded to one decimal place.
+        data_type: number
 
   - name: mart_traffic_patterns
     description: >
@@ -282,28 +337,39 @@ models:
       Enables intra-day traffic analysis to identify morning departure peaks, afternoon arrival
       surges, and quiet overnight windows. Used in Power BI to visualise hourly heatmaps per
       airport and support operational planning insights.
+    config:
+      contract:
+        enforced: true
 
     columns:
       - name: traffic_date
         description: Date of the record, truncated to day.
+        data_type: timestamp_ntz
 
       - name: hour_of_day
         description: Hour of the day (0–23) extracted from first_seen_at.
+        data_type: number
 
       - name: airport_icao
         description: ICAO code of the airport.
+        data_type: varchar
 
       - name: airport_iata
         description: IATA code of the airport.
+        data_type: varchar
 
       - name: airport_name
         description: Full name of the airport.
+        data_type: varchar
 
       - name: city
         description: City where the airport is located.
+        data_type: varchar
 
       - name: flight_type
         description: Whether the flights counted are arrivals or departures.
+        data_type: varchar
 
       - name: flight_count
         description: Number of flights observed in this hour at this airport.
+        data_type: number
