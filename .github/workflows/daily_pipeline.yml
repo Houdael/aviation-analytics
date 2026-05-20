@@ -50,6 +50,10 @@ jobs:
         working-directory: transformations/aviation_analytics
         run: dbt run --profiles-dir .
 
+      - name: Run dbt snapshot
+        working-directory: transformations/aviation_analytics
+        run: dbt snapshot --profiles-dir .
+
       - name: Run dbt tests
         working-directory: transformations/aviation_analytics
         run: dbt test --profiles-dir .
