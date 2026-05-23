@@ -10,6 +10,8 @@ from typing import Any, Generator
 
 import dlt
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # ICAO codes for 10 major European airports
 EUROPEAN_AIRPORTS = [
@@ -86,6 +88,24 @@ class TokenManager:
 OPENSKY_API_BASE = "https://opensky-network.org/api"
 
 
+def _build_session() -> requests.Session:
+    """Return a requests Session with retry logic and exponential backoff."""
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=2,          # waits 2 s, 4 s, 8 s between retries
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET", "POST"],
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    return session
+
+
+_SESSION = _build_session()
+
+
 def fetch_flights(
     airport: str,
     day: date,
@@ -106,11 +126,11 @@ def fetch_flights(
 
     records: list[dict[str, Any]] = []
     for flight_type, url in endpoints:
-        response = requests.get(
+        response = _SESSION.get(
             url,
             params={"airport": airport, "begin": begin, "end": end},
             headers=token_manager.auth_headers,
-            timeout=30,
+            timeout=60,
         )
         response.raise_for_status()
         for record in response.json() or []:
