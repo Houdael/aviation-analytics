@@ -126,3 +126,20 @@ refactor: extract token refresh logic into TokenManager
 - **One commit per logical change** — do not bundle unrelated changes into a single commit. If two changes can be reverted independently, they belong in separate commits.
 - **Imperative mood** — write the subject line as a command: "add X", "fix Y", not "added X" or "fixes Y".
 - **No period at the end** of the subject line.
+
+## Known limitations
+
+### OpenSky API reliability
+
+The OpenSky Network API is a free service and can be intermittently unavailable. Two known failure modes:
+
+1. **Auth server timeout (`auth.opensky-network.org`)** — if OpenSky's OAuth2 server is down, the pipeline cannot authenticate and will fail. The retry strategy (3 retries, exponential backoff) mitigates transient failures but cannot recover from a full outage.
+2. **404 on recent dates** — OpenSky data for the last 24–48h is often not yet available. The pipeline handles this gracefully by skipping and logging a warning instead of failing.
+
+To backfill missing dates, temporarily change `yesterday` in `run_pipeline()` to a specific date and run locally:
+
+```python
+yesterday = date(2026, 5, 22)  # replace with target date
+```
+
+Remember to restore the original line after backfilling. Do not commit the temporary change.
