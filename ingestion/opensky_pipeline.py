@@ -3,10 +3,13 @@ dlt pipeline for pulling flight arrivals and departures from the OpenSky Network
 Covers 10 major European airports.
 """
 
+import logging
 import os
 import time
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Generator
+
+logger = logging.getLogger(__name__)
 
 import dlt
 import requests
@@ -132,6 +135,12 @@ def fetch_flights(
             headers=token_manager.auth_headers,
             timeout=60,
         )
+        if response.status_code == 404:
+            logger.warning(
+                "No %s data for %s on %s (404) — skipping.",
+                flight_type, airport, day,
+            )
+            continue
         response.raise_for_status()
         for record in response.json() or []:
             records.append({**record, "flight_type": flight_type})
