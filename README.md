@@ -10,6 +10,7 @@ End-to-end aviation analytics platform tracking daily flight activity across 10 
 |---|---|
 | **Streamlit dashboard** | [aviation-analytics-hel.streamlit.app](https://aviation-analytics-hel.streamlit.app) |
 | **dbt docs** | [houdael.github.io/aviation-analytics](https://houdael.github.io/aviation-analytics) |
+| **Elementary report** | [houdael.github.io/aviation-analytics/elementary_report.html](https://houdael.github.io/aviation-analytics/elementary_report.html) |
 
 ---
 
