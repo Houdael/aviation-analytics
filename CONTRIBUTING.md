@@ -49,6 +49,39 @@ export SNOWFLAKE_USER=your_user
 export DBT_SNOWFLAKE_PASSWORD=your_password
 ```
 
+## Elementary setup
+
+[Elementary](https://www.elementary-data.com/) is used for data observability — it collects dbt test results, run results, and model metadata into a dedicated `elementary` schema in Snowflake.
+
+### Running `edr report` locally
+
+The Elementary CLI (`edr`) reads from a separate `elementary` profile in `~/.dbt/profiles.yml`. This profile is **not** committed to the repo (it contains credentials) and must be created manually on each machine.
+
+Add the following to `~/.dbt/profiles.yml`, replacing the placeholders:
+
+```yaml
+elementary:
+  outputs:
+    default:
+      type: snowflake
+      account: <your_snowflake_account>
+      user: <your_snowflake_user>
+      password: <your_snowflake_password>
+      database: AVIATION_ANALYTICS_DEV
+      schema: elementary
+      warehouse: AVIATION_DBT_DEV_WH
+      role: AVIATION_DBT_DEV_ROLE
+  target: default
+```
+
+Once the profile is in place, generate a report with:
+
+```bash
+edr report
+```
+
+This produces a self-contained HTML report with test results, model run history, and data health metrics based on what Elementary collected during the last `dbt build` or `dbt test` run.
+
 ## GitHub Actions
 
 ### Schedule trigger and default branch
