@@ -148,7 +148,11 @@ def fetch_flights(
     return records
 
 
-@dlt.resource(name="flights", write_disposition="append")
+@dlt.resource(
+    name="flights",
+    write_disposition="merge",
+    primary_key=["icao24", "firstSeen", "flight_type"],
+)
 def flights_resource(
     day: date,
     token_manager: TokenManager,
