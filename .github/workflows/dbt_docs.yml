@@ -47,10 +47,34 @@ jobs:
         working-directory: transformations/aviation_analytics
         run: dbt docs generate --profiles-dir .
 
+      - name: Generate Elementary report
+        working-directory: transformations/aviation_analytics
+        run: |
+          mkdir -p /tmp/elementary_profiles
+          cat > /tmp/elementary_profiles/profiles.yml <<EOF
+          elementary:
+            outputs:
+              default:
+                type: snowflake
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                schema: elementary
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+                role: AVIATION_DBT_DEV_ROLE
+            target: default
+          EOF
+          edr report \
+            --project-dir . \
+            --profiles-dir /tmp/elementary_profiles \
+            --profile-target default \
+            --file-path target/elementary_report.html
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload dbt docs artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: transformations/aviation_analytics/target
