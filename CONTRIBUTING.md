@@ -143,3 +143,10 @@ yesterday = date(2026, 5, 22)  # replace with target date
 ```
 
 Remember to restore the original line after backfilling. Do not commit the temporary change.
+
+### Idempotent pipeline
+
+The pipeline is idempotent — re-running it for the same date will not produce duplicates. This is enforced at two layers:
+
+1. **dlt `write_disposition='merge'`** — dlt uses `(icao24, firstSeen, flight_type)` as a composite primary key when loading into `RAW`. Re-loading the same day upserts existing records rather than appending new ones. This replaces the previous `write_disposition='append'` strategy, which would insert duplicate rows on every re-run.
+2. **Staging deduplication** — `stg_flights` applies a `QUALIFY ROW_NUMBER() OVER (PARTITION BY icao24, first_seen_at, flight_type ORDER BY _dlt_load_id DESC) = 1` as a defense-in-depth measure, keeping only the most recently loaded record per logical flight in the unlikely event that overlapping load batches slip through.
