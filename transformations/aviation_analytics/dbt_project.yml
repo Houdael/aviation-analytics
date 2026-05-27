@@ -33,3 +33,5 @@ models:
       +materialized: table
       +schema: marts
       +tags: ['marts']
+  elementary:
+    +schema: elementary
