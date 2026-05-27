@@ -47,6 +47,9 @@ jobs:
         working-directory: transformations/aviation_analytics
         run: dbt docs generate --profiles-dir .
 
+      - name: Install Elementary
+        run: pip install "elementary-data[snowflake]"
+
       - name: Generate Elementary report
         working-directory: transformations/aviation_analytics
         run: |
