@@ -124,6 +124,8 @@ elif page == "Route Popularity":
         LIMIT 20
     """)
 
+    df = df[df["DEPARTURE_IATA"].notna() & df["ARRIVAL_IATA"].notna()]
+
     df["ROUTE"] = df["DEPARTURE_IATA"] + " → " + df["ARRIVAL_IATA"]
     df["LABEL"] = df["DEPARTURE_CITY"] + " → " + df["ARRIVAL_CITY"]
 
