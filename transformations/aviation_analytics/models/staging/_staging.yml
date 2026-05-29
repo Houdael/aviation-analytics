@@ -27,7 +27,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['arrival', 'departure']
+              arguments:
+                values: ['arrival', 'departure']
 
       - name: airport_icao
         description: >
