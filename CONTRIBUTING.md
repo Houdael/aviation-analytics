@@ -177,6 +177,10 @@ yesterday = date(2026, 5, 22)  # replace with target date
 
 Remember to restore the original line after backfilling. Do not commit the temporary change.
 
+### Arrivals vs departures imbalance
+
+The OpenSky API returns significantly fewer arrival records than departure records. This is a known limitation of the free API tier, not a pipeline bug. Arrivals data is often incomplete or unavailable for certain airports — the `/flights/arrival` endpoint relies on landing detection from ADS-B coverage, which is less reliable than departure detection. As a result, departure counts will consistently appear higher than arrival counts across all airports and time periods.
+
 ### Idempotent pipeline
 
 The pipeline is idempotent — re-running it for the same date will not produce duplicates. This is enforced at two layers:
