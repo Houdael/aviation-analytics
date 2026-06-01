@@ -69,7 +69,7 @@ class TokenManager:
                 "client_id": self._client_id,
                 "client_secret": self._client_secret,
             },
-            timeout=10,
+            timeout=30,
         )
         response.raise_for_status()
         payload = response.json()
