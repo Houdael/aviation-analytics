@@ -71,6 +71,13 @@ if page == "Airport Traffic":
     col2.metric("Total arrivals", f"{df['TOTAL_ARRIVALS'].sum():,.0f}")
     col3.metric("Total departures", f"{df['TOTAL_DEPARTURES'].sum():,.0f}")
 
+    st.info(
+        "ℹ️ **Arrival data is incomplete.** The free OpenSky Network API's "
+        "`/flights/arrival` endpoint returns partial data for most airports — "
+        "arrivals are often missing or underreported. "
+        "Departure data is complete and reliable."
+    )
+
     st.divider()
 
     fig = px.bar(
