@@ -1,5 +1,5 @@
 """
-Loads the full OpenSky aircraft reference database into STAGING.AIRCRAFT in Snowflake.
+Loads the full OpenSky aircraft reference database into RAW.AIRCRAFT in Snowflake.
 
 Run this script manually whenever aircraftDatabase.csv is updated (downloaded from
 https://opensky-network.org/aircraft-database). It truncates the existing table and
@@ -47,7 +47,7 @@ def main() -> None:
         password=os.environ["SNOWFLAKE_PASSWORD"],
         warehouse=os.environ["SNOWFLAKE_WAREHOUSE"],
         database=os.environ["SNOWFLAKE_DATABASE"],
-        schema="STAGING",
+        schema="RAW",
     )
 
     try:
@@ -55,7 +55,7 @@ def main() -> None:
         cursor = conn.cursor()
         cursor.execute("TRUNCATE TABLE IF EXISTS AIRCRAFT")
         cursor.close()
-        print("Truncated STAGING.AIRCRAFT")
+        print("Truncated RAW.AIRCRAFT")
 
         # --- 4. Load full dataset ---
         success, nchunks, nrows, _ = write_pandas(
@@ -63,13 +63,13 @@ def main() -> None:
             df=df,
             table_name="AIRCRAFT",
             database=os.environ["SNOWFLAKE_DATABASE"],
-            schema="STAGING",
+            schema="RAW",
             auto_create_table=True,
             overwrite=False,
         )
 
         if success:
-            print(f"✅ Loaded {nrows:,} rows into STAGING.AIRCRAFT ({nchunks} chunk(s))")
+            print(f"✅ Loaded {nrows:,} rows into RAW.AIRCRAFT ({nchunks} chunk(s))")
         else:
             print("❌ write_pandas reported failure — check Snowflake logs")
 

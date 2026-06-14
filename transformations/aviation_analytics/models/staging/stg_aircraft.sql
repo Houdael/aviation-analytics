@@ -1,6 +1,6 @@
 with source as (
 
-    select * from {{ ref('aircraft') }}
+    select * from {{ source('opensky', 'aircraft') }}
 
 ),
 

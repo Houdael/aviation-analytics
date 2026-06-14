@@ -14,6 +14,12 @@ sources:
     tables:
       - name: flights
         description: Arrivals and departures for 10 European airports, loaded daily.
+
+      - name: aircraft
+        description: >
+          Full OpenSky aircraft reference database, loaded manually via
+          ingestion/prepare_aircraft_seed.py whenever aircraftDatabase.csv is updated.
+          Contains manufacturer, model, and operator information keyed on icao24.
         columns:
           - name: icao24
             description: 24-bit ICAO transponder address of the aircraft (hex string).
