@@ -1,44 +1,81 @@
-import os 
+"""
+Loads the full OpenSky aircraft reference database into STAGING.AIRCRAFT in Snowflake.
+
+Run this script manually whenever aircraftDatabase.csv is updated (downloaded from
+https://opensky-network.org/aircraft-database). It truncates the existing table and
+replaces it with the full contents of the CSV, keeping only the relevant columns.
+
+Usage:
+    python ingestion/prepare_aircraft_seed.py
+"""
+
+import os
+
 import pandas as pd
 import snowflake.connector
+from snowflake.connector.pandas_tools import write_pandas
 
-
-SNOWFLAKE_ACCOUNT = os.environ["SNOWFLAKE_ACCOUNT"]
-SNOWFLAKE_USER = os.environ["SNOWFLAKE_USER"]
-SNOWFLAKE_PASSWORD = os.environ["SNOWFLAKE_PASSWORD"]
-SNOWFLAKE_WAREHOUSE = os.environ["SNOWFLAKE_WAREHOUSE"]
-SNOWFLAKE_DATABASE = os.environ["SNOWFLAKE_DATABASE"]
-
-conn = snowflake.connector.connect(
-    account     = SNOWFLAKE_ACCOUNT,
-    user        = SNOWFLAKE_USER,
-    password    = SNOWFLAKE_PASSWORD,
-    warehouse   = SNOWFLAKE_WAREHOUSE,
-    database    = SNOWFLAKE_DATABASE,
-    schema      = "RAW"
-)
-
-cursor = conn.cursor()
-cursor.execute("SELECT DISTINCT icao24 FROM flights")
-icao24_list = [row[0] for row in cursor.fetchall()]
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-df = pd.read_csv(os.path.join(BASE_DIR, "aircraftDatabase.csv"))
-df_filtered = df[df["icao24"].isin(icao24_list)]
 
 COLUMNS_TO_KEEP = [
-    "icao24", "registration", "manufacturername", 
-    "model", "typecode", "operator", 
-    "operatorcallsign", "operatoricao", "operatoriata"
+    "icao24",
+    "registration",
+    "manufacturername",
+    "model",
+    "typecode",
+    "operator",
+    "operatorcallsign",
+    "operatoricao",
+    "operatoriata",
 ]
-df_filtered = df_filtered[COLUMNS_TO_KEEP]
 
-df_filtered.to_csv(
-    os.path.join(BASE_DIR, "../transformations/aviation_analytics/seeds/aircraft.csv"),
-    index=False
-)
 
-cursor.close()
-conn.close()
+def main() -> None:
+    # --- 1. Load full CSV ---
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, "aircraftDatabase.csv")
+    df = pd.read_csv(csv_path, low_memory=False)
+    df = df[COLUMNS_TO_KEEP]
+    print(f"Loaded {len(df):,} aircraft records from {csv_path}")
 
-print(f"{len(df_filtered)} aircraft records saved to seeds/aircraft.csv")
+    # Snowflake expects uppercase column names when using write_pandas
+    df.columns = [col.upper() for col in df.columns]
+
+    # --- 2. Connect to Snowflake ---
+    conn = snowflake.connector.connect(
+        account=os.environ["SNOWFLAKE_ACCOUNT"],
+        user=os.environ["SNOWFLAKE_USER"],
+        password=os.environ["SNOWFLAKE_PASSWORD"],
+        warehouse=os.environ["SNOWFLAKE_WAREHOUSE"],
+        database=os.environ["SNOWFLAKE_DATABASE"],
+        schema="STAGING",
+    )
+
+    try:
+        # --- 3. Truncate existing table ---
+        cursor = conn.cursor()
+        cursor.execute("TRUNCATE TABLE IF EXISTS AIRCRAFT")
+        cursor.close()
+        print("Truncated STAGING.AIRCRAFT")
+
+        # --- 4. Load full dataset ---
+        success, nchunks, nrows, _ = write_pandas(
+            conn=conn,
+            df=df,
+            table_name="AIRCRAFT",
+            database=os.environ["SNOWFLAKE_DATABASE"],
+            schema="STAGING",
+            auto_create_table=True,
+            overwrite=False,
+        )
+
+        if success:
+            print(f"✅ Loaded {nrows:,} rows into STAGING.AIRCRAFT ({nchunks} chunk(s))")
+        else:
+            print("❌ write_pandas reported failure — check Snowflake logs")
+
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()
