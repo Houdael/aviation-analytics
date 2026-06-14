@@ -1,6 +1,6 @@
 with source as (
 
-    select * from {{ ref('aircraft') }}
+    select * from {{ source('opensky', 'aircraft') }}
 
 ),
 
@@ -34,7 +34,14 @@ staged as (
         nullif(trim(operatoriata), '')                 as operator_iata
 
     from source
+    where icao24 is not null
 
+),
+
+deduped as (
+    select *
+    from staged
+    qualify row_number() over (partition by icao24 order by icao24) = 1
 )
 
-select * from staged
+select * from deduped

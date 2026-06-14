@@ -14,3 +14,4 @@ aircraftDatabase.csv
 ingestion/aircraftDatabase.csv
 import
 dbt.log
+transformations/aviation_analytics/seeds/aircraft.csv
